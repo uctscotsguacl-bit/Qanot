@@ -1,0 +1,14 @@
+.dart_tool/
+.packages
+.pub-cache/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+android/.gradle/
+android/local.properties
+backend/.venv/
+backend/__pycache__/
+backend/.env
+.env
+*.jks
+*.keystore
