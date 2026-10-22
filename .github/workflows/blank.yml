@@ -4,33 +4,15 @@ name: Build QANOT APK
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout project
         uses: actions/checkout@v4
-
-      - name: Check Flutter project
-        run: |
-          if [ ! -f pubspec.yaml ]; then
-            echo "ERROR: pubspec.yaml topilmadi"
-            exit 1
-          fi
-          if [ ! -f main.dart ] && [ ! -f lib/main.dart ]; then
-            echo "ERROR: main.dart topilmadi"
-            exit 1
-          fi
-
-      - name: Prepare Flutter entry point
-        run: |
-          if [ -f main.dart ]; then
-            mkdir -p lib
-            cp main.dart lib/main.dart
-          fi
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -42,12 +24,35 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          cache: true
+
+      - name: Check Flutter project
+        run: |
+          test -f pubspec.yaml || {
+            echo "ERROR: pubspec.yaml topilmadi"
+            exit 1
+          }
+
+      - name: Prepare Flutter entry point
+        run: |
+          if [ ! -f lib/main.dart ]; then
+            if [ -f main.dart ]; then
+              mkdir -p lib
+              cp main.dart lib/main.dart
+            else
+              echo "ERROR: main.dart topilmadi"
+              exit 1
+            fi
+          fi
+
+      - name: Generate Android platform
+        run: |
+          flutter create --platforms=android \
+            --project-name qanot .
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build release APK
+      - name: Build APK
         run: flutter build apk --release
 
       - name: Upload APK
